@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SecretNotificationProps {
@@ -8,6 +8,17 @@ interface SecretNotificationProps {
 }
 
 const SecretNotification: React.FC<SecretNotificationProps> = ({ isVisible, onClick, onClose }) => {
+    // Auto-dismiss after 15 seconds
+    useEffect(() => {
+        if (isVisible) {
+            const timer = setTimeout(() => {
+                onClose();
+            }, 15000); // 15 seconds
+
+            return () => clearTimeout(timer);
+        }
+    }, [isVisible, onClose]);
+
     return (
         <AnimatePresence>
             {isVisible && (

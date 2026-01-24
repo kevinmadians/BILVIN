@@ -110,9 +110,9 @@ export const TIMELINE_STEPS: TimelineData[] = [
 ];
 
 export const CLOSING_MESSAGE = {
-  recipient: "Dear Bilqis Tazqia Qalby,",
-  body: "Terima kasih sudah nerima aku jadi bagian hidup kamu. Aku cuma mau bilang: aku bersyukur banget punya kamu. Let's make more memories, let's fight through the bad days, and cherish the good ones. I’ll keep trying to be the best for you.",
-  signature: "Created with love by your BILVIN 🦕"
+  recipient: "Dear My Bilqis Tazqia Qalby,",
+  body: "Terimakasih yaa sayangg udah mau nerima aku jadi bagian dari hidup kamu. Aku cuma mau bilang: aku bersyukur banget punya kamu. Let's make more memories, let's fight through the bad days, and cherish the good ones. I’ll keep trying to be the best for you and our future.",
+  signature: "Created with so much love by your KEVIN"
 };
 
 export interface Song {

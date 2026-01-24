@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AnimatePresence, MotionConfig } from 'framer-motion';
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import MobileFrame from './components/MobileFrame';
 import SecretGate from './components/SecretGate';
 import Timeline from './components/Timeline';
@@ -220,12 +220,21 @@ const App: React.FC = () => {
           isUnlocked && !showSecretPage ? (
             <>
               {activeTab !== 'music' && (
-                <div className="absolute bottom-24 right-6 z-40 pointer-events-auto">
+                <motion.div
+                  initial={{ opacity: 1, y: 0 }}
+                  animate={{
+                    opacity: isMenuCollapsed ? 0 : 1,
+                    y: isMenuCollapsed ? 100 : 0,
+                    pointerEvents: isMenuCollapsed ? 'none' : 'auto'
+                  }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  className="absolute bottom-24 right-6 z-40"
+                >
                   <FloatingMusicControl
                     isPlaying={isPlaying}
                     onTogglePlay={togglePlay}
                   />
-                </div>
+                </motion.div>
               )}
               <BottomNav
                 activeTab={activeTab}
