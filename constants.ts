@@ -108,6 +108,37 @@ export const TIMELINE_STEPS: TimelineData[] = [
     secretMessage: "Love you endlessly"
   }
 ];
+export interface MilestoneData {
+  id: number;
+  date: string;
+  title: string;
+  description: string;
+  icon: string;
+}
+
+export const MILESTONES: MilestoneData[] = [
+  {
+    id: 1,
+    date: "9 September 2025",
+    title: "Official Day",
+    description: "The day we started our journey together.",
+    icon: "❤️"
+  },
+  {
+    id: 2,
+    date: "Every Day",
+    title: "Falling in Love",
+    description: "Every single day finding new reasons to love you.",
+    icon: "📅"
+  },
+  {
+    id: 3,
+    date: "Future",
+    title: "Wedding Day",
+    description: "Waiting for the day we say 'I do'.",
+    icon: "💍"
+  }
+];
 
 export const CLOSING_MESSAGE = {
   recipient: "Dear My Bilqis Tazqia Qalby,",

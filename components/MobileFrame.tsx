@@ -82,7 +82,7 @@ const MobileFrame: React.FC<MobileFrameProps> = ({
           className="flex-1 relative w-full overflow-y-auto no-scrollbar scroll-smooth z-10"
           onScroll={onScroll}
         >
-          <div className="absolute inset-0 min-h-full">
+          <div className="relative w-full min-h-full">
             {children}
           </div>
         </div>

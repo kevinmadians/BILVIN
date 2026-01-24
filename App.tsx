@@ -11,11 +11,14 @@ import SettingsPage from './components/SettingsPage';
 import SecretNotification from './components/SecretNotification';
 import SecretMessagePage from './components/SecretMessagePage';
 import FloatingMusicControl from './components/FloatingMusicControl';
+import Preloader from './components/Preloader';
+import Milestones from './components/Milestones';
 import { PLAYLIST } from './constants';
 
-type TabType = 'story' | 'gallery' | 'music' | 'settings';
+type TabType = 'story' | 'gallery' | 'milestones' | 'music' | 'settings';
 
 const App: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('story');
   // Set default to TRUE for Dark Mode
@@ -181,6 +184,8 @@ const App: React.FC = () => {
         return <Timeline />;
       case 'gallery':
         return <Gallery />;
+      case 'milestones':
+        return <Milestones />;
       case 'music':
         return (
           <MusicPage
@@ -209,6 +214,10 @@ const App: React.FC = () => {
         return <Timeline />;
     }
   };
+
+  if (isLoading) {
+    return <Preloader onComplete={() => setIsLoading(false)} />;
+  }
 
   return (
     <MotionConfig reducedMotion={reducedMotion ? "always" : "user"}>

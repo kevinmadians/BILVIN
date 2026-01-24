@@ -1,11 +1,14 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+
+import MessageForm from './MessageForm';
 
 interface SecretMessagePageProps {
     onBack: () => void;
 }
 
 const SecretMessagePage: React.FC<SecretMessagePageProps> = ({ onBack }) => {
+    const [showMessageForm, setShowMessageForm] = React.useState(false);
     return (
         <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-rose-50 to-stone-100 dark:from-slate-900 dark:to-slate-950 relative overflow-hidden">
 
@@ -44,14 +47,28 @@ const SecretMessagePage: React.FC<SecretMessagePageProps> = ({ onBack }) => {
                         - Forever Yours
                     </p>
 
-                    <button
-                        onClick={onBack}
-                        className="px-6 py-2 rounded-full bg-stone-800 dark:bg-white text-white dark:text-black font-medium text-sm hover:scale-105 active:scale-95 transition-transform"
-                    >
-                        Close Secret
-                    </button>
+                    <div className="flex gap-4 justify-center">
+                        <button
+                            onClick={onBack}
+                            className="px-6 py-2 rounded-full bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-medium text-sm hover:bg-stone-300 dark:hover:bg-stone-700 transition-colors"
+                        >
+                            Close Secret
+                        </button>
+                        <button
+                            onClick={() => setShowMessageForm(true)}
+                            className="px-6 py-2 rounded-full bg-rose-500 text-white font-medium text-sm hover:bg-rose-600 shadow-lg shadow-rose-500/20 hover:scale-105 transition-all"
+                        >
+                            Reply to Kevin 💌
+                        </button>
+                    </div>
                 </motion.div>
             </motion.div>
+
+            <AnimatePresence>
+                {showMessageForm && (
+                    <MessageForm onCancel={() => setShowMessageForm(false)} />
+                )}
+            </AnimatePresence>
         </div>
     );
 };
