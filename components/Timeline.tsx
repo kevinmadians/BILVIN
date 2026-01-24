@@ -4,6 +4,26 @@ import TimelineStep from './TimelineStep';
 import { TIMELINE_STEPS, CLOSING_MESSAGE } from '../constants';
 
 const Timeline: React.FC = () => {
+  const [showScrollGuide, setShowScrollGuide] = useState(true);
+
+  useEffect(() => {
+    // Hide scroll guide after 5 seconds or on scroll
+    const timer = setTimeout(() => {
+      setShowScrollGuide(false);
+    }, 5000);
+
+    const handleScroll = () => {
+      setShowScrollGuide(false);
+    };
+
+    window.addEventListener('scroll', handleScroll, true);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, []);
+
   return (
     <motion.div
       key="timeline"
@@ -12,6 +32,54 @@ const Timeline: React.FC = () => {
       transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
       className="relative z-10 w-full min-h-full pb-32"
     >
+      {/* Scroll/Swipe Guide Indicator */}
+      <AnimatePresence>
+        {showScrollGuide && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5, delay: 1.5 }}
+            className="fixed bottom-32 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center pointer-events-none"
+          >
+            {/* Animated arrow */}
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className="mb-2"
+            >
+              <svg
+                className="w-6 h-6 text-rose-400 dark:text-rose-300"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+              </svg>
+            </motion.div>
+
+            {/* Guide text */}
+            <motion.div
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="text-center"
+            >
+              <p className="text-xs font-medium tracking-widest uppercase text-rose-400 dark:text-rose-300">
+                <span className="hidden sm:inline">Scroll to explore</span>
+                <span className="sm:hidden">Swipe up</span>
+              </p>
+            </motion.div>
+
+            {/* Decorative line */}
+            <motion.div
+              animate={{ scaleY: [0.5, 1, 0.5] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className="w-px h-8 mt-2 bg-gradient-to-b from-rose-400/50 to-transparent dark:from-rose-300/50"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header Area */}
       <div className="pt-20 pb-12 px-8 text-center">
         <motion.div

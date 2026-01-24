@@ -120,22 +120,22 @@ export const MILESTONES: MilestoneData[] = [
   {
     id: 1,
     date: "9 September 2025",
-    title: "Official Day",
-    description: "The day we started our journey together.",
+    title: "Hari Jadian",
+    description: "Hari dimana aku nemuin kebahagiaan baru dalam hidup.",
     icon: "❤️"
   },
   {
     id: 2,
-    date: "Every Day",
-    title: "Falling in Love",
-    description: "Every single day finding new reasons to love you.",
+    date: "Setiap Hari",
+    title: "Jatuh Cinta",
+    description: "Setiap hari aku sayang sama kamu.",
     icon: "📅"
   },
   {
     id: 3,
-    date: "Future",
-    title: "Wedding Day",
-    description: "Waiting for the day we say 'I do'.",
+    date: "Masa Depan",
+    title: "Hari Pernikahan",
+    description: "Hari paling spesial di hidupku, hari dimana kita menikah dan jadi satu keluarga.",
     icon: "💍"
   }
 ];

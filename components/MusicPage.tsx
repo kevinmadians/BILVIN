@@ -128,12 +128,32 @@ const MusicPage: React.FC<MusicPageProps> = ({
         </button>
       </div>
 
-      {/* Romantic Note */}
+      {/* Spotify Playlist Embed */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.8 }}
-        className="mt-8 mb-24 max-w-md text-center px-6 py-6 bg-rose-50/50 dark:bg-rose-900/20 rounded-2xl border border-rose-200/50 dark:border-rose-800/30 backdrop-blur-sm"
+        className="w-full max-w-md mt-8"
+      >
+        <iframe
+          data-testid="embed-iframe"
+          style={{ borderRadius: '12px' }}
+          src="https://open.spotify.com/embed/playlist/7bXAH68eQA1YkgtmN2CJzv?utm_source=generator"
+          width="100%"
+          height="352"
+          frameBorder={0}
+          allowFullScreen
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+        />
+      </motion.div>
+
+      {/* Romantic Note */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7, duration: 0.8 }}
+        className="mt-6 mb-24 max-w-md text-center px-6 py-6 bg-rose-50/50 dark:bg-rose-900/20 rounded-2xl border border-rose-200/50 dark:border-rose-800/30 backdrop-blur-sm"
       >
         <p className="italic text-stone-600 dark:text-rose-100/80 leading-relaxed text-sm">
           Aku pilih beberapa lagu <strong className="font-bold text-rose-600 dark:text-rose-300">untuk kamu</strong>:
@@ -146,6 +166,9 @@ const MusicPage: React.FC<MusicPageProps> = ({
         </p>
         <p className="italic text-stone-600 dark:text-rose-100/80 leading-relaxed text-sm mt-3">
           karena aku mau jadi <strong className="font-bold text-rose-600 dark:text-rose-300">tempat pulang kamu</strong>, bahkan saat dunia ngga berpihak sama kamu, <strong className="font-bold text-rose-600 dark:text-rose-300">cantik</strong>..
+        </p>
+        <p className="italic text-stone-600 dark:text-rose-100/80 leading-relaxed text-sm mt-3">
+          Dan ngga lupa aku juga tambahin playlist lagu favorit kamu di spotify, yang kamu buat saat kamu jatuh cinta sama seseorang, termasuk aku..
         </p>
       </motion.div>
 

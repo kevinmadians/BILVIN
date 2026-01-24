@@ -41,17 +41,19 @@ const SecretGate: React.FC<SecretGateProps> = ({ onUnlock }) => {
       transition={{ duration: 0.8 }}
       className="absolute inset-0 z-50 flex flex-col items-center justify-center p-8 text-center backdrop-blur-sm bg-white/30 dark:bg-black/40"
     >
-      <div className="mb-8">
-        <h1 className="font-serif text-4xl md:text-5xl text-stone-800 dark:text-stone-100 tracking-tight mb-3 shadow-sm">
-          KEVIN MADIAN
-        </h1>
-        <p className="font-sans text-stone-500 dark:text-stone-400 text-xs md:text-sm tracking-[0.2em] uppercase font-medium mb-6">
-          PORTFOLIO & SHOWCASE
-        </p>
-        <p className="font-sans text-stone-600 dark:text-stone-300 text-sm max-w-md mx-auto leading-relaxed opacity-80">
-          Welcome to my personal space. If you want to know more about me, then insert the secret code below.
-        </p>
-      </div>
+      {!isSuccess && (
+        <div className="mb-8">
+          <h1 className="font-serif text-4xl md:text-5xl text-stone-800 dark:text-stone-100 tracking-tight mb-3 shadow-sm">
+            KEVIN MADIAN
+          </h1>
+          <p className="font-sans text-stone-500 dark:text-stone-400 text-xs md:text-sm tracking-[0.2em] uppercase font-medium mb-6">
+            PORTFOLIO & SHOWCASE
+          </p>
+          <p className="font-sans text-stone-600 dark:text-stone-300 text-sm max-w-md mx-auto leading-relaxed opacity-80">
+            Welcome to my personal space. If you want to know more about me, then insert the secret code below.
+          </p>
+        </div>
+      )}
 
       <AnimatePresence mode="wait">
         {isSuccess ? (
@@ -60,28 +62,69 @@ const SecretGate: React.FC<SecretGateProps> = ({ onUnlock }) => {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white/80 dark:bg-black/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl max-w-sm w-full border border-stone-100 dark:border-stone-800"
+            className="relative bg-gradient-to-b from-white/90 via-rose-50/80 to-white/90 dark:from-stone-900/95 dark:via-rose-950/30 dark:to-stone-900/95 backdrop-blur-xl p-10 rounded-3xl shadow-2xl max-w-sm w-full border border-rose-100/50 dark:border-rose-900/30 overflow-hidden"
           >
+            {/* Decorative sparkles */}
+            <div className="absolute top-4 left-6 text-rose-300 dark:text-rose-400 text-xs opacity-60">✦</div>
+            <div className="absolute top-8 right-8 text-rose-300 dark:text-rose-400 text-sm opacity-40">✧</div>
+            <div className="absolute bottom-12 left-8 text-rose-300 dark:text-rose-400 text-xs opacity-50">✦</div>
+            <div className="absolute bottom-6 right-6 text-rose-300 dark:text-rose-400 text-sm opacity-30">✧</div>
+
+            {/* Animated unlock icon */}
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.2 }}
-              className="text-4xl mb-4 text-center"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 12, delay: 0.2 }}
+              className="text-5xl mb-6 text-center"
             >
-              🔓
+              <span className="drop-shadow-lg">🔓</span>
             </motion.div>
-            <h3 className="text-xl font-serif text-stone-800 dark:text-stone-200 mb-4 font-medium italic">
-              "Access Granted"
-            </h3>
-            <p className="text-stone-600 dark:text-stone-300 text-sm mb-8 leading-relaxed">
-              Welcome to the world of BILVIN.
-            </p>
-            <button
-              onClick={handleEnterMain}
-              className="w-full bg-stone-800 hover:bg-black dark:bg-stone-700 dark:hover:bg-stone-600 text-white rounded-full py-3 text-sm font-medium tracking-widest transition-all shadow-lg hover:shadow-xl active:scale-95"
+
+            {/* Main headline */}
+            <motion.h2
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-2xl md:text-3xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-rose-600 via-pink-500 to-rose-600 dark:from-rose-400 dark:via-pink-300 dark:to-rose-400 mb-2 font-bold tracking-wide text-center"
             >
-              ENTER
-            </button>
+              The World Of Bilvin
+            </motion.h2>
+
+            {/* Access granted subtitle */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-xs uppercase tracking-[0.3em] text-rose-400 dark:text-rose-500 mb-6 font-medium"
+            >
+              Access Granted
+            </motion.p>
+
+            {/* Special italic welcome text */}
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="font-serif italic text-base md:text-lg text-stone-600 dark:text-stone-300 mb-8 leading-relaxed"
+            >
+              <span className="text-rose-500 dark:text-rose-400">"</span>
+              Welcome to the world of{' '}
+              <span className="font-bold bg-gradient-to-r from-rose-500 to-pink-500 dark:from-rose-400 dark:to-pink-400 bg-clip-text text-transparent">BILVIN</span>
+              <span className="text-rose-500 dark:text-rose-400">"</span>
+            </motion.p>
+
+            {/* Premium enter button */}
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleEnterMain}
+              className="w-full bg-gradient-to-r from-rose-500 via-pink-500 to-rose-500 hover:from-rose-600 hover:via-pink-600 hover:to-rose-600 text-white rounded-full py-4 text-sm font-semibold tracking-[0.2em] uppercase transition-all shadow-lg shadow-rose-500/25 hover:shadow-xl hover:shadow-rose-500/30"
+            >
+              ✨ Enter Our Story ✨
+            </motion.button>
           </motion.div>
         ) : (
           <motion.form
