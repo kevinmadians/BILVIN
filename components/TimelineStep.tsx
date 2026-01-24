@@ -166,13 +166,45 @@ const TimelineStep: React.FC<TimelineStepProps> = ({ heading, text, image, capti
             onKeyDown={handleKeyDown}
             role="button"
             tabIndex={0}
-            aria-label={isFlipped ? "Flip back to photo" : "Flip to see secret message"}
+            aria-label={isFlipped ? "Flip back to quote" : "Flip to see photo"}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             layout={false}
           >
-            {/* Front of Card */}
-            <div className="backface-hidden relative overflow-hidden rounded-lg shadow-xl bg-white dark:bg-stone-800 p-3 transform rotate-1 transition-transform duration-500 group-hover:rotate-0">
+            {/* Front of Card (Secret Message - shown by default) */}
+            <div className="backface-hidden relative overflow-hidden rounded-lg shadow-xl bg-gradient-to-br from-slate-900 via-stone-900 to-slate-900 border border-stone-800 p-3 transform rotate-1 transition-transform duration-500 group-hover:rotate-0">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-md flex flex-col items-center justify-center text-center bg-gradient-to-br from-slate-800/50 to-stone-900/50">
+
+                {/* Decorative corners */}
+                <div className="absolute top-3 right-3 text-rose-500 opacity-80 z-10">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                </div>
+                <div className="absolute bottom-3 left-3 text-rose-500 opacity-80 z-10">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                </div>
+
+                <div className="flex-1 flex flex-col items-center justify-center z-10 gap-2 px-4">
+                  <h3 className="font-typewriter text-rose-400 text-xl leading-loose tracking-widest drop-shadow-md">
+                    "{secretMessage || 'I love you'}"
+                  </h3>
+                  <span className="text-2xl animate-pulse">❤️</span>
+                </div>
+
+                <p className="absolute bottom-3 right-3 text-[10px] uppercase tracking-[0.3em] text-stone-300/60 font-sans z-10">
+                  Secret Note
+                </p>
+              </div>
+            </div>
+
+            {/* Back of Card (Clear Photo - shown when flipped) */}
+            <div
+              className="absolute inset-0 backface-hidden rounded-lg shadow-xl bg-white dark:bg-stone-800 p-3 overflow-hidden"
+              style={{ transform: 'rotateY(180deg)' }}
+            >
               <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-rose-50 dark:bg-stone-700">
                 <img
                   src={image}
@@ -189,48 +221,12 @@ const TimelineStep: React.FC<TimelineStepProps> = ({ heading, text, image, capti
               </div>
             </div>
 
-            {/* Back of Card (Secret) */}
-            <div
-              className="absolute inset-0 backface-hidden rounded-lg shadow-xl bg-black border border-stone-800 p-8 flex flex-col items-center justify-center text-center overflow-hidden"
-              style={{ transform: 'rotateY(180deg)' }}
-            >
-              {/* Background Image for Back Card */}
-              <div className="absolute inset-0 z-0">
-                <img src={image} alt="" className="w-full h-full object-cover" />
-                {/* Dark Overlay for readability */}
-                <div className="absolute inset-0 bg-black/50" />
-              </div>
-
-              {/* Decorative corners */}
-              <div className="absolute top-3 right-3 text-rose-500 opacity-80 z-10">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                </svg>
-              </div>
-              <div className="absolute bottom-3 left-3 text-rose-500 opacity-80 z-10">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                </svg>
-              </div>
-
-              <div className="flex-1 flex flex-col items-center justify-center z-10 gap-2">
-                <h3 className="font-typewriter text-rose-400 text-xl leading-loose tracking-widest drop-shadow-md">
-                  "{secretMessage || 'I love you'}"
-                </h3>
-                <span className="text-2xl animate-pulse">❤️</span>
-              </div>
-
-              <p className="mt-auto text-[10px] uppercase tracking-[0.3em] text-stone-300/60 font-sans z-10">
-                Secret Note
-              </p>
-            </div>
-
           </motion.div>
 
           <motion.div
             className={`absolute -bottom-7 left-0 right-0 text-center text-[10px] text-stone-400 dark:text-stone-500 italic pointer-events-none transition-opacity duration-500 ${isFlipped ? 'opacity-0' : 'opacity-70'}`}
           >
-            (tap to reveal secret)
+            (tap untuk buka)
           </motion.div>
         </motion.div>
       </div>

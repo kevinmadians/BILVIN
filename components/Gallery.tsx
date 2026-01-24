@@ -1,6 +1,48 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TIMELINE_STEPS } from '../constants';
+
+// All gallery images including new photos and GIFs
+const GALLERY_IMAGES = [
+  // New bilvin webp images
+  '/images/bilvin (1).webp',
+  '/images/bilvin (2).webp',
+  '/images/bilvin (3).webp',
+  '/images/bilvin (4).webp',
+  '/images/bilvin (5).webp',
+  '/images/bilvin (6).webp',
+  '/images/bilvin (7).webp',
+  '/images/bilvin (8).webp',
+  '/images/bilvin (9).webp',
+  '/images/bilvin (10).webp',
+  '/images/bilvin (11).webp',
+  '/images/bilvin (12).webp',
+  '/images/bilvin (13).webp',
+  '/images/bilvin (14).webp',
+  '/images/bilvin (15).webp',
+  '/images/bilvin (16).webp',
+  '/images/bilvin (17).webp',
+  '/images/bilvin (18).webp',
+  '/images/bilvin (19).webp',
+  '/images/bilvin (20).webp',
+  '/images/bilvin (21).webp',
+  '/images/bilvin (22).webp',
+  '/images/bilvin (23).webp',
+  '/images/bilvin (24).webp',
+  '/images/bilvin (25).webp',
+  '/images/bilvin (26).webp',
+  // GIFs
+  '/images/gif1.gif',
+  '/images/gif2.gif',
+  '/images/gif3.gif',
+  '/images/gif4.gif',
+  '/images/gif5.gif',
+  // Other photos
+  '/images/jadian.jpg',
+  '/images/photos3.jpg',
+  '/images/photos8.jpg',
+  '/images/photos10.jpg',
+  '/images/photo12.jpg',
+];
 
 const Gallery: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -21,7 +63,7 @@ const Gallery: React.FC = () => {
   const goNext = useCallback(() => {
     if (selectedIndex !== null) {
       setSelectedIndex((prev) =>
-        prev !== null ? (prev + 1) % TIMELINE_STEPS.length : 0
+        prev !== null ? (prev + 1) % GALLERY_IMAGES.length : 0
       );
     }
   }, [selectedIndex]);
@@ -29,7 +71,7 @@ const Gallery: React.FC = () => {
   const goPrev = useCallback(() => {
     if (selectedIndex !== null) {
       setSelectedIndex((prev) =>
-        prev !== null ? (prev - 1 + TIMELINE_STEPS.length) % TIMELINE_STEPS.length : 0
+        prev !== null ? (prev - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length : 0
       );
     }
   }, [selectedIndex]);
@@ -69,6 +111,9 @@ const Gallery: React.FC = () => {
     if (isRightSwipe) goPrev();
   };
 
+  // Check if image is a GIF
+  const isGif = (src: string) => src.toLowerCase().endsWith('.gif');
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -78,26 +123,33 @@ const Gallery: React.FC = () => {
     >
       <div className="text-center mb-8">
         <h1 className="font-serif text-3xl text-stone-800 dark:text-rose-50">Our Gallery</h1>
-        <p className="font-sans text-rose-400 text-sm italic mt-2">Captured moments</p>
+        <p className="font-sans text-rose-400 text-sm italic mt-2">Captured moments 💕</p>
+        <p className="font-sans text-stone-500 dark:text-stone-400 text-xs mt-1">{GALLERY_IMAGES.length} memories</p>
       </div>
 
       {/* Gallery Grid */}
       <div className="columns-2 gap-3 space-y-3">
-        {TIMELINE_STEPS.map((step, index) => (
+        {GALLERY_IMAGES.map((imageSrc, index) => (
           <motion.div
-            key={step.id}
+            key={index}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.08 }}
+            transition={{ delay: Math.min(index * 0.03, 1) }}
             className="break-inside-avoid relative group rounded-xl overflow-hidden shadow-md bg-white dark:bg-slate-800 cursor-pointer"
             onClick={() => openPreview(index)}
           >
             <img
-              src={step.image}
+              src={imageSrc}
               alt={`Photo ${index + 1}`}
               className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
             />
+            {/* GIF indicator */}
+            {isGif(imageSrc) && (
+              <div className="absolute top-2 left-2 px-2 py-1 rounded-full bg-rose-500/90 text-white text-[10px] font-bold uppercase tracking-wider">
+                GIF
+              </div>
+            )}
             {/* Hover overlay with zoom icon */}
             <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
               <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -138,8 +190,11 @@ const Gallery: React.FC = () => {
             </button>
 
             {/* Image counter */}
-            <div className="absolute top-4 left-4 z-50 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm text-white text-sm font-medium">
-              {selectedIndex + 1} / {TIMELINE_STEPS.length}
+            <div className="absolute top-4 left-4 z-50 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm text-white text-sm font-medium flex items-center gap-2">
+              <span>{selectedIndex + 1} / {GALLERY_IMAGES.length}</span>
+              {isGif(GALLERY_IMAGES[selectedIndex]) && (
+                <span className="px-1.5 py-0.5 rounded bg-rose-500 text-[10px] font-bold">GIF</span>
+              )}
             </div>
 
             {/* Previous button */}
@@ -173,7 +228,7 @@ const Gallery: React.FC = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <img
-                src={TIMELINE_STEPS[selectedIndex].image}
+                src={GALLERY_IMAGES[selectedIndex]}
                 alt={`Photo ${selectedIndex + 1}`}
                 className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
               />
@@ -190,24 +245,29 @@ const Gallery: React.FC = () => {
               </svg>
             </div>
 
-            {/* Thumbnail strip at bottom */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 hidden sm:flex gap-2 px-4 py-2 bg-black/50 backdrop-blur-sm rounded-full">
-              {TIMELINE_STEPS.map((step, index) => (
+            {/* Thumbnail strip at bottom - only show first 10 for performance */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 hidden sm:flex gap-2 px-4 py-2 bg-black/50 backdrop-blur-sm rounded-full max-w-[90vw] overflow-x-auto">
+              {GALLERY_IMAGES.slice(0, 15).map((imageSrc, index) => (
                 <button
-                  key={step.id}
+                  key={index}
                   onClick={(e) => { e.stopPropagation(); setSelectedIndex(index); }}
-                  className={`w-12 h-8 rounded overflow-hidden transition-all duration-200 ${index === selectedIndex
-                      ? 'ring-2 ring-rose-500 scale-110'
-                      : 'opacity-50 hover:opacity-100'
+                  className={`w-12 h-8 flex-shrink-0 rounded overflow-hidden transition-all duration-200 ${index === selectedIndex
+                    ? 'ring-2 ring-rose-500 scale-110'
+                    : 'opacity-50 hover:opacity-100'
                     }`}
                 >
                   <img
-                    src={step.image}
+                    src={imageSrc}
                     alt={`Thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
                 </button>
               ))}
+              {GALLERY_IMAGES.length > 15 && (
+                <div className="w-12 h-8 flex-shrink-0 rounded bg-white/10 flex items-center justify-center text-white text-xs">
+                  +{GALLERY_IMAGES.length - 15}
+                </div>
+              )}
             </div>
           </motion.div>
         )}
