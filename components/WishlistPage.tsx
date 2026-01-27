@@ -375,7 +375,7 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ currentUser }) => {
                                 exit={{ opacity: 0, x: 20 }}
                                 transition={{ delay: index * 0.03 }}
                                 onClick={() => setSelectedItem(item)}
-                                className={`relative bg-white/70 dark:bg-slate-800/70 backdrop-blur-md rounded-2xl p-3 sm:p-4 border border-white/50 dark:border-white/10 shadow-sm overflow-hidden cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all ${item.completed ? 'opacity-60' : ''
+                                className={`relative bg-white/70 dark:bg-slate-800/70 backdrop-blur-md rounded-xl p-3 border border-white/50 dark:border-white/10 shadow-sm overflow-hidden cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all ${item.completed ? 'opacity-60' : ''
                                     }`}
                             >
                                 {/* Completion decoration */}
@@ -387,11 +387,11 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ currentUser }) => {
                                     />
                                 )}
 
-                                <div className="flex items-start gap-2 sm:gap-3 relative">
+                                <div className="flex items-center gap-2 relative">
                                     {/* Checkbox */}
                                     <button
                                         onClick={(e) => { e.stopPropagation(); handleToggleComplete(item); }}
-                                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${item.completed
+                                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${item.completed
                                             ? 'bg-green-500 border-green-500 text-white'
                                             : 'border-stone-300 dark:border-stone-600 hover:border-rose-400 dark:hover:border-rose-400'
                                             }`}
@@ -400,7 +400,7 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ currentUser }) => {
                                             <motion.svg
                                                 initial={{ scale: 0 }}
                                                 animate={{ scale: 1 }}
-                                                className="w-3.5 h-3.5"
+                                                className="w-3 h-3"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"
@@ -412,96 +412,60 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ currentUser }) => {
 
                                     {/* Content */}
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-base sm:text-lg">{item.emoji}</span>
-                                            <h3 className={`font-medium text-stone-800 dark:text-white ${item.completed ? 'line-through' : ''}`}>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-sm">{item.emoji}</span>
+                                            <h3 className={`font-medium text-sm text-stone-800 dark:text-white truncate ${item.completed ? 'line-through' : ''}`}>
                                                 {item.title}
                                             </h3>
                                         </div>
 
-                                        {item.description && (
-                                            <p className={`text-xs sm:text-sm text-stone-500 dark:text-stone-400 ${item.completed ? 'line-through' : ''}`}>
-                                                {item.description}
-                                            </p>
-                                        )}
-
-                                        {/* Budget, Location, Target Date */}
-                                        {(item.budget || item.lokasi || item.target_date) && (
-                                            <div className="mt-2 flex flex-wrap gap-2">
-                                                {item.budget && (
-                                                    <span className="inline-flex items-center gap-1 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">
-                                                        💰 Rp {item.budget.toLocaleString('id-ID')}
-                                                    </span>
-                                                )}
-                                                {item.lokasi && (
-                                                    <span className="inline-flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full">
-                                                        📍 {item.lokasi}
-                                                    </span>
-                                                )}
-                                                {item.target_date && (
-                                                    <span className="inline-flex items-center gap-1 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-1 rounded-full">
-                                                        📅 {new Date(item.target_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {/* Image preview */}
-                                        {item.image_url && (
-                                            <div className="mt-2 rounded-lg overflow-hidden">
-                                                <img
-                                                    src={item.image_url}
-                                                    alt={item.title}
-                                                    className="w-full h-24 sm:h-32 object-cover"
-                                                />
-                                            </div>
-                                        )}
-
-                                        {/* Creator/Editor info */}
-                                        <div className="mt-2 flex flex-wrap gap-2 text-xs text-stone-400 dark:text-stone-500">
-                                            <span className="flex items-center gap-1">
-                                                Dibuat oleh {USER_CREDENTIALS[item.created_by].displayName}
+                                        {/* Compact metadata row */}
+                                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                            {/* Category Badge */}
+                                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${item.category === 'travel' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300' :
+                                                item.category === 'couple' ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300' :
+                                                    'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300'
+                                                }`}>
+                                                {item.category === 'travel' ? '✈️' : item.category === 'couple' ? '💑' : '🏠'}
                                             </span>
-                                            {item.updated_by && item.updated_by !== item.created_by && (
-                                                <span className="flex items-center gap-1">
-                                                    • Diedit oleh {USER_CREDENTIALS[item.updated_by].displayName}
+                                            {item.budget && (
+                                                <span className="text-[10px] text-green-600 dark:text-green-400">
+                                                    💰 {(item.budget / 1000000).toFixed(1)}jt
+                                                </span>
+                                            )}
+                                            {item.lokasi && (
+                                                <span className="text-[10px] text-blue-600 dark:text-blue-400 truncate max-w-[80px]">
+                                                    📍 {item.lokasi}
+                                                </span>
+                                            )}
+                                            {item.target_date && (
+                                                <span className="text-[10px] text-purple-600 dark:text-purple-400">
+                                                    📅 {new Date(item.target_date).toLocaleDateString('id-ID', { month: 'short', year: '2-digit' })}
                                                 </span>
                                             )}
                                         </div>
                                     </div>
 
-                                    {/* Actions */}
-                                    <div className="flex flex-col gap-1">
-                                        {/* Category Badge */}
-                                        <span className={`text-xs px-2 py-1 rounded-full flex-shrink-0 text-center ${item.category === 'travel' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300' :
-                                            item.category === 'couple' ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300' :
-                                                'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300'
-                                            }`}>
-                                            {item.category === 'travel' ? '✈️' : item.category === 'couple' ? '💑' : '🏠'}
-                                        </span>
+                                    {/* Image thumbnail */}
+                                    {item.image_url && (
+                                        <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                                            <img
+                                                src={item.image_url}
+                                                alt={item.title}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    )}
 
-                                        {/* Edit button */}
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); handleEdit(item); }}
-                                            className="p-1.5 text-stone-400 hover:text-rose-500 transition-colors"
-                                        >
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-
-                                        {/* Delete button (only for creator) */}
-                                        {item.created_by === currentUser && (
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
-                                                className="p-1.5 text-stone-400 hover:text-red-500 transition-colors"
-                                            >
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        )}
-                                    </div>
+                                    {/* Quick action - Edit */}
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleEdit(item); }}
+                                        className="p-1.5 text-stone-400 hover:text-rose-500 transition-colors flex-shrink-0"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                    </button>
                                 </div>
                             </motion.div>
                         ))}
