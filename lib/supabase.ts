@@ -31,6 +31,7 @@ export interface WishlistItemDB {
     created_at: string;
     updated_by: 'bilqis' | 'kevin' | null;
     updated_at: string;
+    sort_order: number | null; // For manual sorting/drag-drop
 }
 
 // CRUD Operations for Wishlist
@@ -46,7 +47,19 @@ export const wishlistService = {
             console.error('Error fetching wishlist:', error);
             return [];
         }
-        return data || [];
+
+        // Sort client-side: items with sort_order first (ascending), then by created_at
+        const items = data || [];
+        return items.sort((a, b) => {
+            // Items with sort_order come first
+            if (a.sort_order !== null && b.sort_order !== null) {
+                return a.sort_order - b.sort_order;
+            }
+            if (a.sort_order !== null) return -1;
+            if (b.sort_order !== null) return 1;
+            // Fall back to created_at (newest first)
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
     },
 
     // Add new wishlist item
@@ -118,6 +131,25 @@ export const wishlistService = {
                 callback
             )
             .subscribe();
+    },
+
+    // Update sort order for multiple items (batch update)
+    async updateOrder(items: { id: string; sort_order: number }[]): Promise<boolean> {
+        try {
+            // Update each item's sort_order
+            const updates = items.map(item =>
+                supabase
+                    .from('wishlist_items')
+                    .update({ sort_order: item.sort_order })
+                    .eq('id', item.id)
+            );
+
+            await Promise.all(updates);
+            return true;
+        } catch (error) {
+            console.error('Error updating order:', error);
+            return false;
+        }
     }
 };
 

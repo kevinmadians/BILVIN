@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
 import { UserType, USER_CREDENTIALS } from '../constants';
 import { wishlistService, storageService, isSupabaseConfigured, WishlistItemDB } from '../lib/supabase';
 
@@ -18,6 +18,7 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ currentUser }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
     const [showCelebration, setShowCelebration] = useState(false);
+    const [isDragMode, setIsDragMode] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Form state
@@ -201,7 +202,8 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ currentUser }) => {
                 lokasi: formData.lokasi || null,
                 target_date: formData.target_date || null,
                 completed: false,
-                created_by: currentUser
+                created_by: currentUser,
+                sort_order: 0 // New items go to top
             };
 
             if (isSupabaseConfigured()) {
@@ -280,6 +282,40 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ currentUser }) => {
         setShowAddModal(true);
     };
 
+    // Handle reordering of wishlist items
+    const handleReorder = async (reorderedItems: WishlistItemDB[]) => {
+        // Update local state immediately for smooth UX
+        if (activeCategory === 'all') {
+            setWishlist(reorderedItems);
+        } else {
+            // When filtering by category, we need to merge back
+            const otherItems = wishlist.filter(item => item.category !== activeCategory);
+            const newOrder = [...reorderedItems, ...otherItems];
+            setWishlist(newOrder);
+        }
+
+        // Persist to database
+        if (isSupabaseConfigured()) {
+            const orderUpdates = reorderedItems.map((item, index) => ({
+                id: item.id,
+                sort_order: index
+            }));
+            await wishlistService.updateOrder(orderUpdates);
+        } else {
+            // localStorage fallback
+            const updatedWishlist = activeCategory === 'all'
+                ? reorderedItems
+                : [...reorderedItems, ...wishlist.filter(item => item.category !== activeCategory)];
+            localStorage.setItem('bilvin-wishlist-v2', JSON.stringify(updatedWishlist));
+        }
+    };
+
+    // Save order when exiting drag mode
+    const handleSaveOrder = () => {
+        setIsDragMode(false);
+        showToast('Urutan berhasil disimpan! ✨', 'success');
+    };
+
     const filteredWishlist = activeCategory === 'all'
         ? wishlist
         : wishlist.filter(item => item.category === activeCategory);
@@ -348,6 +384,46 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ currentUser }) => {
                 ))}
             </motion.div>
 
+            {/* Drag Mode Toggle & Instructions */}
+            {!isLoading && filteredWishlist.length > 1 && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="mb-4"
+                >
+                    {isDragMode ? (
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/30 rounded-xl border border-amber-200 dark:border-amber-800">
+                                <span className="text-xl">✋</span>
+                                <div className="flex-1">
+                                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200">Mode Atur Urutan</p>
+                                    <p className="text-xs text-amber-600 dark:text-amber-400">Geser item ke atas atau bawah untuk mengatur urutan</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleSaveOrder}
+                                className="w-full py-2.5 bg-green-500 text-white font-medium rounded-xl shadow-lg shadow-green-500/30 hover:bg-green-600 transition-all flex items-center justify-center gap-2"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Simpan
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => setIsDragMode(true)}
+                            className="flex items-center gap-2 px-3 py-2 bg-white/60 dark:bg-slate-800/60 rounded-xl text-xs font-medium text-stone-600 dark:text-stone-300 hover:bg-white dark:hover:bg-slate-700 transition-all border border-stone-200 dark:border-stone-700"
+                        >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                            </svg>
+                            Atur Urutan
+                        </button>
+                    )}
+                </motion.div>
+            )}
+
             {/* Loading State */}
             {isLoading ? (
                 <div className="flex justify-center items-center py-12">
@@ -365,111 +441,182 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ currentUser }) => {
                     transition={{ delay: 0.2 }}
                     className="space-y-3"
                 >
-                    <AnimatePresence mode="popLayout">
-                        {filteredWishlist.map((item, index) => (
-                            <motion.div
-                                key={item.id}
-                                layout
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 20 }}
-                                transition={{ delay: index * 0.03 }}
-                                onClick={() => setSelectedItem(item)}
-                                className={`relative bg-white/70 dark:bg-slate-800/70 backdrop-blur-md rounded-xl p-3 border border-white/50 dark:border-white/10 shadow-sm overflow-hidden cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all ${item.completed ? 'opacity-60' : ''
-                                    }`}
-                            >
-                                {/* Completion decoration */}
-                                {item.completed && (
-                                    <motion.div
-                                        initial={{ scaleX: 0 }}
-                                        animate={{ scaleX: 1 }}
-                                        className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 dark:from-green-500/20 dark:to-emerald-500/20"
-                                    />
-                                )}
+                    {isDragMode ? (
+                        /* Drag Mode - Reorderable List */
+                        <Reorder.Group
+                            axis="y"
+                            values={filteredWishlist}
+                            onReorder={handleReorder}
+                            className="space-y-3"
+                        >
+                            {filteredWishlist.map((item) => (
+                                <Reorder.Item
+                                    key={item.id}
+                                    value={item}
+                                    className={`relative bg-white/70 dark:bg-slate-800/70 backdrop-blur-md rounded-xl p-3 border-2 border-dashed border-rose-300 dark:border-rose-600 shadow-sm overflow-hidden cursor-grab active:cursor-grabbing touch-none ${item.completed ? 'opacity-60' : ''}`}
+                                    whileDrag={{
+                                        scale: 1.02,
+                                        boxShadow: "0 10px 30px rgba(244, 63, 94, 0.3)",
+                                        zIndex: 50
+                                    }}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        {/* Drag Handle */}
+                                        <div className="flex flex-col gap-0.5 text-rose-400 flex-shrink-0">
+                                            <div className="flex gap-0.5">
+                                                <span className="w-1 h-1 bg-current rounded-full"></span>
+                                                <span className="w-1 h-1 bg-current rounded-full"></span>
+                                            </div>
+                                            <div className="flex gap-0.5">
+                                                <span className="w-1 h-1 bg-current rounded-full"></span>
+                                                <span className="w-1 h-1 bg-current rounded-full"></span>
+                                            </div>
+                                            <div className="flex gap-0.5">
+                                                <span className="w-1 h-1 bg-current rounded-full"></span>
+                                                <span className="w-1 h-1 bg-current rounded-full"></span>
+                                            </div>
+                                        </div>
 
-                                <div className="flex items-center gap-2 relative">
-                                    {/* Checkbox */}
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); handleToggleComplete(item); }}
-                                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${item.completed
-                                            ? 'bg-green-500 border-green-500 text-white'
-                                            : 'border-stone-300 dark:border-stone-600 hover:border-rose-400 dark:hover:border-rose-400'
-                                            }`}
-                                    >
-                                        {item.completed && (
-                                            <motion.svg
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                className="w-3 h-3"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                            </motion.svg>
+                                        {/* Content */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-sm">{item.emoji}</span>
+                                                <h3 className={`font-medium text-sm text-stone-800 dark:text-white truncate ${item.completed ? 'line-through' : ''}`}>
+                                                    {item.title}
+                                                </h3>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${item.category === 'travel' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300' :
+                                                    item.category === 'couple' ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300' :
+                                                        'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300'
+                                                    }`}>
+                                                    {item.category === 'travel' ? '✈️' : item.category === 'couple' ? '💑' : '🏠'}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Image thumbnail */}
+                                        {item.image_url && (
+                                            <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                                                <img
+                                                    src={item.image_url}
+                                                    alt={item.title}
+                                                    className="w-full h-full object-cover pointer-events-none"
+                                                />
+                                            </div>
                                         )}
-                                    </button>
-
-                                    {/* Content */}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="text-sm">{item.emoji}</span>
-                                            <h3 className={`font-medium text-sm text-stone-800 dark:text-white truncate ${item.completed ? 'line-through' : ''}`}>
-                                                {item.title}
-                                            </h3>
-                                        </div>
-
-                                        {/* Compact metadata row */}
-                                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                                            {/* Category Badge */}
-                                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${item.category === 'travel' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300' :
-                                                item.category === 'couple' ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300' :
-                                                    'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300'
-                                                }`}>
-                                                {item.category === 'travel' ? '✈️' : item.category === 'couple' ? '💑' : '🏠'}
-                                            </span>
-                                            {item.budget && (
-                                                <span className="text-[10px] text-green-600 dark:text-green-400">
-                                                    💰 {(item.budget / 1000000).toFixed(1)}jt
-                                                </span>
-                                            )}
-                                            {item.lokasi && (
-                                                <span className="text-[10px] text-blue-600 dark:text-blue-400 truncate max-w-[80px]">
-                                                    📍 {item.lokasi}
-                                                </span>
-                                            )}
-                                            {item.target_date && (
-                                                <span className="text-[10px] text-purple-600 dark:text-purple-400">
-                                                    📅 {new Date(item.target_date).toLocaleDateString('id-ID', { month: 'short', year: '2-digit' })}
-                                                </span>
-                                            )}
-                                        </div>
                                     </div>
-
-                                    {/* Image thumbnail */}
-                                    {item.image_url && (
-                                        <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
-                                            <img
-                                                src={item.image_url}
-                                                alt={item.title}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
+                                </Reorder.Item>
+                            ))}
+                        </Reorder.Group>
+                    ) : (
+                        /* Normal Mode - Regular List */
+                        <AnimatePresence mode="popLayout">
+                            {filteredWishlist.map((item, index) => (
+                                <motion.div
+                                    key={item.id}
+                                    layout
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    transition={{ delay: index * 0.03 }}
+                                    onClick={() => setSelectedItem(item)}
+                                    className={`relative bg-white/70 dark:bg-slate-800/70 backdrop-blur-md rounded-xl p-3 border border-white/50 dark:border-white/10 shadow-sm overflow-hidden cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all ${item.completed ? 'opacity-60' : ''
+                                        }`}
+                                >
+                                    {/* Completion decoration */}
+                                    {item.completed && (
+                                        <motion.div
+                                            initial={{ scaleX: 0 }}
+                                            animate={{ scaleX: 1 }}
+                                            className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 dark:from-green-500/20 dark:to-emerald-500/20"
+                                        />
                                     )}
 
-                                    {/* Quick action - Edit */}
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); handleEdit(item); }}
-                                        className="p-1.5 text-stone-400 hover:text-rose-500 transition-colors flex-shrink-0"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
+                                    <div className="flex items-center gap-2 relative">
+                                        {/* Checkbox */}
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleToggleComplete(item); }}
+                                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${item.completed
+                                                ? 'bg-green-500 border-green-500 text-white'
+                                                : 'border-stone-300 dark:border-stone-600 hover:border-rose-400 dark:hover:border-rose-400'
+                                                }`}
+                                        >
+                                            {item.completed && (
+                                                <motion.svg
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    className="w-3 h-3"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                </motion.svg>
+                                            )}
+                                        </button>
+
+                                        {/* Content */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-sm">{item.emoji}</span>
+                                                <h3 className={`font-medium text-sm text-stone-800 dark:text-white truncate ${item.completed ? 'line-through' : ''}`}>
+                                                    {item.title}
+                                                </h3>
+                                            </div>
+
+                                            {/* Compact metadata row */}
+                                            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                                {/* Category Badge */}
+                                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${item.category === 'travel' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300' :
+                                                    item.category === 'couple' ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300' :
+                                                        'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300'
+                                                    }`}>
+                                                    {item.category === 'travel' ? '✈️' : item.category === 'couple' ? '💑' : '🏠'}
+                                                </span>
+                                                {item.budget && (
+                                                    <span className="text-[10px] text-green-600 dark:text-green-400">
+                                                        💰 {(item.budget / 1000000).toFixed(1)}jt
+                                                    </span>
+                                                )}
+                                                {item.lokasi && (
+                                                    <span className="text-[10px] text-blue-600 dark:text-blue-400 truncate max-w-[80px]">
+                                                        📍 {item.lokasi}
+                                                    </span>
+                                                )}
+                                                {item.target_date && (
+                                                    <span className="text-[10px] text-purple-600 dark:text-purple-400">
+                                                        📅 {new Date(item.target_date).toLocaleDateString('id-ID', { month: 'short', year: '2-digit' })}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Image thumbnail */}
+                                        {item.image_url && (
+                                            <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                                                <img
+                                                    src={item.image_url}
+                                                    alt={item.title}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* Quick action - Edit */}
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleEdit(item); }}
+                                            className="p-1.5 text-stone-400 hover:text-rose-500 transition-colors flex-shrink-0"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    )}
 
                     {filteredWishlist.length === 0 && (
                         <motion.div

@@ -141,6 +141,7 @@ const SecretGate: React.FC<SecretGateProps> = ({ onUnlock }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onSubmit={handleSubmit}
+            autoComplete="off"
             className="w-full max-w-[280px] flex flex-col gap-4"
           >
             <div className="relative">
@@ -149,6 +150,8 @@ const SecretGate: React.FC<SecretGateProps> = ({ onUnlock }) => {
                 value={inputCode}
                 onChange={(e) => setInputCode(e.target.value)}
                 placeholder="Enter access code..."
+                autoComplete="off"
+                data-form-type="other"
                 className="w-full bg-white/70 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 rounded-full py-3 px-6 pr-12 text-center text-stone-800 dark:text-stone-200 placeholder:text-stone-400 dark:placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-stone-600 focus:bg-white dark:focus:bg-stone-800 transition-all text-sm shadow-lg backdrop-blur-md"
               />
               <button
